@@ -1,0 +1,104 @@
+plugins {
+    id 'jvm-component'
+    id 'java-lang'
+	id 'cpp'
+}
+
+version = '0.0'
+group = 'org.bven'
+
+//Looks like this is the only way to add custom header/lib paths from
+//outside the project dir.
+//https://discuss.gradle.org/t/native-why-does-gradle-ignore-value-set-for-environment-variable-lib-and-libpath/11427
+class ExternalLibrary implements NativeDependencySet {
+
+	final FileCollection includeRoots
+    final FileCollection linkFiles
+    final FileCollection runtimeFiles
+	
+    ExternalLibrary(inc, bin, lib) {
+        this.includeRoots = inc
+        this.runtimeFiles = bin
+		this.linkFiles = lib
+    }
+}
+
+def jni = {
+	def javaHome = System.env.'JAVA_HOME'
+	try {
+		javaHome = "cygpath -w '$javaHome'".execute().text.trim()
+	} catch (IOException e) { 
+		// Not in cygwin; if you're running this from msys{,2} you're out of luck, maybe?
+	}
+	def includes = project.files "${javaHome}\\include", "${javaHome}\\include\\win32"
+	new ExternalLibrary(includes, project.files(), project.files())
+}()
+
+model {
+  
+	platforms {
+        x86 {
+            architecture "x86"
+        }
+        x64 {
+            architecture "x86_64"
+        }
+	}
+	
+    components {
+		main(JvmLibrarySpec)
+        cpp(NativeLibrarySpec) {
+			targetPlatform 'x86'
+			targetPlatform 'x64'
+			
+			binaries.all {
+				lib jni
+			}
+			
+			binaries.withType(SharedLibraryBinarySpec) {
+				def file = sharedLibraryFile
+				file = new File(file.parent, "${project.name}-${targetPlatform.name}.${file.name.split("\\.", 2)[1]}")
+				sharedLibraryFile = file
+			}
+		}
+    }
+	
+	tasks {
+		javah(Exec) { javah ->
+			def nativeIncludes = "src/cpp/headers"
+			def mainClassName = "${project.group}.${project.name}.Native"
+			def classes = $.tasks.compileMainJarMainJava
+			def classpath = "${classes.destinationDir}"
+			
+			commandLine "javah", "-d", nativeIncludes, "-classpath", classpath, mainClassName
+			
+			inputs.dir classpath
+			outputs.dir nativeIncludes
+			
+			javah.dependsOn classes
+		}
+		
+		copyDlls(Copy) {
+		copyDlls ->
+		
+			def libs = $.binaries.withType(SharedLibraryBinary)
+			from libs*.sharedLibraryFile
+			into "src/main/resources/"
+			libs*.tasks.each {
+				copyDlls.dependsOn it
+			}
+		}
+		
+		processMainJarMainResources {
+			it.dependsOn $.tasks.copyDlls
+		}
+		
+		withType(CppCompile) {
+			it.dependsOn $.tasks.javah
+		}
+
+		wrapper {
+			gradleVersion = '2.10'
+		}
+	}
+}
