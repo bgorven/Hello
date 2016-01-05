@@ -1,7 +1,7 @@
 plugins {
     id 'jvm-component'
     id 'java-lang'
-	id 'cpp'
+    id 'cpp'
 }
 
 version = '0.0'
@@ -12,93 +12,93 @@ group = 'org.bven'
 //https://discuss.gradle.org/t/native-why-does-gradle-ignore-value-set-for-environment-variable-lib-and-libpath/11427
 class ExternalLibrary implements NativeDependencySet {
 
-	final FileCollection includeRoots
+    final FileCollection includeRoots
     final FileCollection linkFiles
     final FileCollection runtimeFiles
-	
+
     ExternalLibrary(inc, bin, lib) {
         this.includeRoots = inc
         this.runtimeFiles = bin
-		this.linkFiles = lib
+        this.linkFiles = lib
     }
 }
 
 def jni = {
-	def javaHome = System.env.'JAVA_HOME'
-	try {
-		javaHome = "cygpath -w '$javaHome'".execute().text.trim()
-	} catch (IOException e) { 
-		// Not in cygwin; if you're running this from msys{,2} you're out of luck, maybe?
-	}
-	def includes = project.files "${javaHome}\\include", "${javaHome}\\include\\win32"
-	new ExternalLibrary(includes, project.files(), project.files())
+    def javaHome = System.env.'JAVA_HOME'
+    try {
+        javaHome = "cygpath -w '$javaHome'".execute().text.trim()
+    } catch (IOException e) { 
+        // Not in cygwin; if you're running this from msys{,2} you're out of luck, maybe?
+    }
+    def includes = project.files "${javaHome}\\include", "${javaHome}\\include\\win32"
+    new ExternalLibrary(includes, project.files(), project.files())
 }()
 
 model {
-  
-	platforms {
-		['windows', 'linux', 'osx', 'freebsd', 'solaris'].each { os ->
-			['x86', 'x64', 'arm'].each { arch ->
-				"$os-$arch" {
-					architecture arch
-					operatingSystem os
-				}
-			}
-		}
-	}
-	
-    components {
-		main(JvmLibrarySpec)
-        cpp(NativeLibrarySpec) { library ->
-			$.platforms.all {
-				library.targetPlatform it.name
-			}
-			
-			binaries.all {
-				lib jni
-				baseName = "${project.name}-${targetPlatform.name}"
-			}
-		}
-    }
-	
-	tasks {
-		javah(Exec) { javah ->
-			def nativeIncludes = "src/cpp/headers"
-			def mainClassName = "${project.group}.${project.name}.Native"
-			def classes = $.tasks.compileMainJarMainJava
-			def classpath = "${classes.destinationDir}"
-			
-			commandLine "javah", "-d", nativeIncludes, "-classpath", classpath, mainClassName
-			
-			inputs.dir classpath
-			outputs.dir nativeIncludes
-			
-			javah.dependsOn classes
-		}
-		
-		copyDlls(Copy) {
-			def libs = $.binaries.withType(SharedLibraryBinary)
-			libs.each { lib ->
-				println lib.name
-				if (lib.buildable) {
-					println 'buildable'
-					from lib.sharedLibraryFile
-					into "src/main/resources/"
-					it.dependsOn lib.tasks
-				}
-			}
-		}
-		
-		processMainJarMainResources {
-			it.dependsOn $.tasks.copyDlls
-		}
-		
-		withType(CppCompile) {
-			it.dependsOn $.tasks.javah
-		}
 
-		wrapper {
-			gradleVersion = '2.10'
-		}
-	}
+    platforms {
+        ['windows', 'linux', 'osx', 'freebsd', 'solaris'].each { os ->
+            ['x86', 'x64', 'arm'].each { arch ->
+                "$os-$arch" {
+                    architecture arch
+                    operatingSystem os
+                }
+            }
+        }
+    }
+
+    components {
+        main(JvmLibrarySpec)
+        cpp(NativeLibrarySpec) { library ->
+            $.platforms.all {
+                library.targetPlatform it.name
+            }
+
+            binaries.all {
+                lib jni
+                baseName = "${project.name}-${targetPlatform.name}"
+            }
+        }
+    }
+
+    tasks {
+        javah(Exec) { javah ->
+            def nativeIncludes = "src/cpp/headers"
+            def mainClassName = "${project.group}.${project.name}.Native"
+            def classes = $.tasks.compileMainJarMainJava
+            def classpath = "${classes.destinationDir}"
+
+            commandLine "javah", "-d", nativeIncludes, "-classpath", classpath, mainClassName
+
+            inputs.dir classpath
+            outputs.dir nativeIncludes
+
+            javah.dependsOn classes
+        }
+
+        copyDlls(Copy) {
+            def libs = $.binaries.withType(SharedLibraryBinary)
+            libs.each { lib ->
+                println lib.name
+                if (lib.buildable) {
+                    println 'buildable'
+                    from lib.sharedLibraryFile
+                    into "src/main/resources/"
+                    it.dependsOn lib.tasks
+                }
+            }
+        }
+
+        processMainJarMainResources {
+            it.dependsOn $.tasks.copyDlls
+        }
+
+        withType(CppCompile) {
+            it.dependsOn $.tasks.javah
+        }
+
+        wrapper {
+            gradleVersion = '2.10'
+        }
+    }
 }

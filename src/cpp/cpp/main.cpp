@@ -11,7 +11,7 @@ using namespace std;
  */
 JNIEXPORT jstring JNICALL Java_org_bven_hello_Native_getGreeting
   (JNIEnv *env, jclass) {
-	return env->NewStringUTF("Hello");
+    return env->NewStringUTF("Hello");
 }
 
 /*
@@ -21,7 +21,7 @@ JNIEXPORT jstring JNICALL Java_org_bven_hello_Native_getGreeting
  */
 JNIEXPORT void JNICALL Java_org_bven_hello_Native_sendGreeting
   (JNIEnv *env, jclass, jstring message) {
-	const char *string = env->GetStringUTFChars(message, NULL);
-	cout << string;
-	env->ReleaseStringUTFChars(message, string);
+    const char *string = env->GetStringUTFChars(message, NULL);
+    cout << string;
+    env->ReleaseStringUTFChars(message, string);
 }
