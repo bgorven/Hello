@@ -1,13 +1,8 @@
 #include "main.h"
 #include "org_bven_hello_Native.h"
 
-#define _WIN32_DCOM
 #include <iostream>
 using namespace std;
-#include <comdef.h>
-#include <Wbemidl.h>
-
-# pragma comment(lib, "wbemuuid.lib")
 
 /*
  * Class:     org_bven_hello_Native

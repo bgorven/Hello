@@ -37,28 +37,26 @@ def jni = {
 model {
   
 	platforms {
-        x86 {
-            architecture "x86"
-        }
-        x64 {
-            architecture "x86_64"
-        }
+		['windows', 'linux', 'osx', 'freebsd', 'solaris'].each { os ->
+			['x86', 'x64', 'arm'].each { arch ->
+				"$os-$arch" {
+					architecture arch
+					operatingSystem os
+				}
+			}
+		}
 	}
 	
     components {
 		main(JvmLibrarySpec)
-        cpp(NativeLibrarySpec) {
-			targetPlatform 'x86'
-			targetPlatform 'x64'
+        cpp(NativeLibrarySpec) { library ->
+			$.platforms.all {
+				library.targetPlatform it.name
+			}
 			
 			binaries.all {
 				lib jni
-			}
-			
-			binaries.withType(SharedLibraryBinarySpec) {
-				def file = sharedLibraryFile
-				file = new File(file.parent, "${project.name}-${targetPlatform.name}.${file.name.split("\\.", 2)[1]}")
-				sharedLibraryFile = file
+				baseName = "${project.name}-${targetPlatform.name}"
 			}
 		}
     }
@@ -79,13 +77,15 @@ model {
 		}
 		
 		copyDlls(Copy) {
-		copyDlls ->
-		
 			def libs = $.binaries.withType(SharedLibraryBinary)
-			from libs*.sharedLibraryFile
-			into "src/main/resources/"
-			libs*.tasks.each {
-				copyDlls.dependsOn it
+			libs.each { lib ->
+				println lib.name
+				if (lib.buildable) {
+					println 'buildable'
+					from lib.sharedLibraryFile
+					into "src/main/resources/"
+					it.dependsOn lib.tasks
+				}
 			}
 		}
 		
