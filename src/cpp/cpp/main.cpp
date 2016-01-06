@@ -22,6 +22,6 @@ JNIEXPORT jstring JNICALL Java_org_bven_hello_Native_getGreeting
 JNIEXPORT void JNICALL Java_org_bven_hello_Native_sendGreeting
   (JNIEnv *env, jclass, jstring message) {
     const char *string = env->GetStringUTFChars(message, NULL);
-    cout << string;
+    cout << string << endl;
     env->ReleaseStringUTFChars(message, string);
 }

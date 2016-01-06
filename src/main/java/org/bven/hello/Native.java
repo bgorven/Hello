@@ -12,7 +12,7 @@ public class Native {
             tmp.toFile().deleteOnExit();
             String fileName = "64".equals(bits) ? "hello-x64.dll" : "hello-x86.dll";
             Path file = tmp.resolve(fileName);
-            try (InputStream in = Native.class.getResourceAsStream("/" + fileName);
+            try (InputStream in = Native.class.getResourceAsStream("/linux-x64/libcpp.so");
                     OutputStream out = new FileOutputStream(file.toFile())) {
                 byte[] buf = new byte[8192];
                 int len;

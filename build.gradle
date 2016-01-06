@@ -30,7 +30,8 @@ def jni = {
     } catch (IOException e) { 
         // Not in cygwin; if you're running this from msys{,2} you're out of luck, maybe?
     }
-    def includes = project.files "${javaHome}\\include", "${javaHome}\\include\\win32"
+    def includes = project.files "${javaHome}/include"
+    project.file("${javaHome}/include").eachDir { includes += project.files it }
     new ExternalLibrary(includes, project.files(), project.files())
 }()
 
@@ -56,13 +57,13 @@ model {
 
             binaries.all {
                 lib jni
-                baseName = "${project.name}-${targetPlatform.name}"
             }
         }
     }
 
     tasks {
-        javah(Exec) { javah ->
+        javah(Exec) {
+
             def nativeIncludes = "src/cpp/headers"
             def mainClassName = "${project.group}.${project.name}.Native"
             def classes = $.tasks.compileMainJarMainJava
@@ -73,17 +74,17 @@ model {
             inputs.dir classpath
             outputs.dir nativeIncludes
 
-            javah.dependsOn classes
+            it.dependsOn classes
         }
 
         copyDlls(Copy) {
             def libs = $.binaries.withType(SharedLibraryBinary)
             libs.each { lib ->
-                println lib.name
                 if (lib.buildable) {
-                    println 'buildable'
-                    from lib.sharedLibraryFile
-                    into "src/main/resources/"
+                    into 'src/main/resources'
+                    from lib.sharedLibraryFile, {
+                        into "${lib.targetPlatform.name}"
+                    }
                     it.dependsOn lib.tasks
                 }
             }
