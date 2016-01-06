@@ -2,14 +2,21 @@ plugins {
     id 'jvm-component'
     id 'java-lang'
     id 'cpp'
+    id 'maven-publish'
 }
 
 version = '0.0'
 group = 'org.bven'
 
-//Looks like this is the only way to add custom header/lib paths from
-//outside the project dir.
-//https://discuss.gradle.org/t/native-why-does-gradle-ignore-value-set-for-environment-variable-lib-and-libpath/11427
+// Process resources task doesn't get created if there aren't any resources; create a placeholder to ensure that it does.
+def placeholder = file('src/main/resources/deleteme')
+if (!placeholder.exists()) {
+    placeholder.createNewFile()
+}
+
+// Looks like this is the only way to add custom header/lib paths from
+// outside the project dir.
+// https://discuss.gradle.org/t/native-why-does-gradle-ignore-value-set-for-environment-variable-lib-and-libpath/11427
 class ExternalLibrary implements NativeDependencySet {
 
     final FileCollection includeRoots
@@ -91,6 +98,7 @@ model {
         }
 
         processMainJarMainResources {
+            placeholder.delete() // Placeholder has served its purpose
             it.dependsOn $.tasks.copyDlls
         }
 
@@ -102,4 +110,11 @@ model {
             gradleVersion = '2.10'
         }
     }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication)
+        }
+    }
 }
+
