@@ -10,6 +10,9 @@ group = 'org.bven'
 
 // Process resources task doesn't get created if there aren't any resources; create a placeholder to ensure that it does.
 def placeholder = file('src/main/resources/deleteme')
+if (!placeholder.parentFile.exists()) {
+	placeholder.parentFile.mkdirs()
+}
 if (!placeholder.exists()) {
     placeholder.createNewFile()
 }
@@ -57,7 +60,7 @@ model {
 
     components {
         main(JvmLibrarySpec)
-        cpp(NativeLibrarySpec) { library ->
+        hello(NativeLibrarySpec) { library ->
             $.platforms.all {
                 library.targetPlatform it.name
             }
@@ -84,15 +87,17 @@ model {
             it.dependsOn classes
         }
 
-        copyDlls(Copy) {
-            def libs = $.binaries.withType(SharedLibraryBinary)
-            libs.each { lib ->
+        copyDlls(Copy) { copyTask ->
+			into 'src/main/resources/lib'
+			
+            ($.binaries.withType(SharedLibraryBinary)).each {
+				lib ->
+				
                 if (lib.buildable) {
-                    into 'src/main/resources'
                     from lib.sharedLibraryFile, {
                         into "${lib.targetPlatform.name}"
                     }
-                    it.dependsOn lib.tasks
+                    copyTask.dependsOn lib.tasks
                 }
             }
         }
@@ -105,6 +110,15 @@ model {
         withType(CppCompile) {
             it.dependsOn $.tasks.javah
         }
+		
+		run(JavaExec) {
+			def compile = $.tasks.compileMainJarMainJava;
+			def jar = $.tasks.createMainJar;
+			dependsOn $.tasks.mainJar
+			classpath compile.classpath
+			classpath jar.outputs
+			main = 'org.bven.hello.Native'
+		}
 
         wrapper {
             gradleVersion = '2.10'

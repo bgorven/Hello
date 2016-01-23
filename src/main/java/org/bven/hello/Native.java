@@ -8,11 +8,15 @@ public class Native {
     static {
         try {
             String bits = System.getProperty("sun.arch.data.model");
-            Path tmp = Files.createTempDirectory("lib");
-            tmp.toFile().deleteOnExit();
-            String fileName = "64".equals(bits) ? "hello-x64.dll" : "hello-x86.dll";
-            Path file = tmp.resolve(fileName);
-            try (InputStream in = Native.class.getResourceAsStream("/linux-x64/libcpp.so");
+			String subdir = "64".equals(bits) ? "windows-x64" : "windows-x86";
+            String fileName = "hello.dll";
+			
+            Path tmpdir = Files.createTempDirectory("lib");
+			tmpdir.toFile().mkdir();
+            tmpdir.toFile().deleteOnExit();
+            Path file = tmpdir.resolve(fileName);
+		
+            try (InputStream in = Native.class.getResourceAsStream("/lib/" + subdir + "/" + fileName);
                     OutputStream out = new FileOutputStream(file.toFile())) {
                 byte[] buf = new byte[8192];
                 int len;
@@ -24,7 +28,7 @@ public class Native {
         } catch (Exception e) {
             throw new Error("Failed to extract and load library.", e);
         }
-    }
+	}
 
     private native static String getGreeting();
 
