@@ -11,7 +11,7 @@ group = 'org.bven'
 // Process resources task doesn't get created if there aren't any resources; create a placeholder to ensure that it does.
 def placeholder = file('src/main/resources/deleteme')
 if (!placeholder.parentFile.exists()) {
-	placeholder.parentFile.mkdirs()
+    placeholder.parentFile.mkdirs()
 }
 if (!placeholder.exists()) {
     placeholder.createNewFile()
@@ -59,7 +59,12 @@ model {
     }
 
     components {
-        main(JvmLibrarySpec)
+        archloader(JvmLibrarySpec)
+        main(JvmLibrarySpec) {
+            dependencies { 
+                library 'archloader'
+            }
+        }
         hello(NativeLibrarySpec) { library ->
             $.platforms.all {
                 library.targetPlatform it.name
@@ -73,31 +78,33 @@ model {
 
     tasks {
         javah(Exec) {
+            ['hello'].each{ name ->
 
-            def nativeIncludes = "src/cpp/headers"
-            def mainClassName = "${project.group}.${project.name}.Native"
-            def classes = $.tasks.compileMainJarMainJava
-            def classpath = "${classes.destinationDir}"
+                def nativeIncludes = "src/${name}/headers"
+                def mainClassName = "${project.group}.${name}.Native"
+                def classes = $.tasks.compileMainJarMainJava
+                def classpath = "${classes.destinationDir}"
 
-            commandLine "javah", "-d", nativeIncludes, "-classpath", classpath, mainClassName
+                commandLine "javah", "-d", nativeIncludes, "-classpath", classpath, mainClassName
 
-            inputs.dir classpath
-            outputs.dir nativeIncludes
+                inputs.dir classpath
+                outputs.dir nativeIncludes
 
-            it.dependsOn classes
+                dependsOn classes
+            }
         }
 
-        copyDlls(Copy) { copyTask ->
-			into 'src/main/resources/lib'
-			
+        copyDlls(Copy) {
+            into 'src/main/resources/lib'
+            
             ($.binaries.withType(SharedLibraryBinary)).each {
-				lib ->
-				
+                lib ->
+                
                 if (lib.buildable) {
                     from lib.sharedLibraryFile, {
                         into "${lib.targetPlatform.name}"
                     }
-                    copyTask.dependsOn lib.tasks
+                    dependsOn lib.tasks
                 }
             }
         }
@@ -110,15 +117,15 @@ model {
         withType(CppCompile) {
             it.dependsOn $.tasks.javah
         }
-		
-		run(JavaExec) {
-			def compile = $.tasks.compileMainJarMainJava;
-			def jar = $.tasks.createMainJar;
-			dependsOn $.tasks.mainJar
-			classpath compile.classpath
-			classpath jar.outputs
-			main = 'org.bven.hello.Native'
-		}
+        
+        run(JavaExec) {
+            def compile = $.tasks.compileMainJarMainJava;
+            def jar = $.tasks.createMainJar;
+            dependsOn $.tasks.mainJar
+            classpath compile.classpath
+            classpath jar.outputs
+            main = 'org.bven.hello.Native'
+        }
 
         wrapper {
             gradleVersion = '2.10'
