@@ -3,7 +3,11 @@ plugins {
     id 'java-lang'
     id 'cpp'
     id 'maven-publish'
+    id 'com.bmuschko.vagrant-base' version '2.0'
 }
+
+import com.bmuschko.gradle.vagrant.tasks.*
+vagrant.installation.validate = false
 
 version = '0.0'
 group = 'org.bven'
@@ -34,12 +38,7 @@ class ExternalLibrary implements NativeDependencySet {
 }
 
 def jni = {
-    def javaHome = System.env.'JAVA_HOME'
-    try {
-        javaHome = "cygpath -w '$javaHome'".execute().text.trim()
-    } catch (IOException e) { 
-        // Not in cygwin; if you're running this from msys{,2} you're out of luck, maybe?
-    }
+    def javaHome = System.properties.'java.home' + '/..'
     def includes = project.files "${javaHome}/include"
     project.file("${javaHome}/include").eachDir { includes += project.files it }
     new ExternalLibrary(includes, project.files(), project.files())
@@ -94,7 +93,7 @@ model {
             }
         }
 
-        copyDlls(Copy) {
+        copyLibs(Copy) {
             into 'src/main/resources/lib'
             
             ($.binaries.withType(SharedLibraryBinary)).each {
@@ -111,13 +110,13 @@ model {
 
         processMainJarMainResources {
             placeholder.delete() // Placeholder has served its purpose
-            it.dependsOn $.tasks.copyDlls
+            it.dependsOn "copyLibs"
         }
 
         withType(CppCompile) {
-            it.dependsOn $.tasks.javah
+            it.dependsOn "javah"
         }
-        
+
         run(JavaExec) {
             def compile = $.tasks.compileMainJarMainJava;
             def jar = $.tasks.createMainJar;
@@ -125,6 +124,23 @@ model {
             classpath compile.classpath
             classpath jar.outputs
             main = 'org.bven.hello.Native'
+        }
+
+        ['linux', 'windows', 'freebsd'].each { os ->
+
+            "${os}Up"(VagrantUp) {
+                commands.add os
+            }
+
+            "${os}Run"(Vagrant) {
+                dependsOn "${os}Up"
+                commands = ['ssh', os, '-c', '/vagrant/gradlew -p /vagrant run']
+            }
+
+            "${os}Halt"(VagrantHalt) {
+                mustRunAfter "${os}Run"
+                commands.add os
+            }
         }
 
         wrapper {

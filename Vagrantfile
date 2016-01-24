@@ -17,23 +17,36 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.define "linux" do |config|
-    config.vm.box = "thdengops/ubuntu-14.04-dev"
-    config.vm.network "private_network", ip: "192.168.33.10"
+    config.vm.box = "ubuntu/trusty64"
+    config.vm.network "private_network", type: "dhcp"
 
     config.vm.provision "shell", inline: <<-SHELL
+      sudo add-apt-repository -y ppa:openjdk-r/ppa
       sudo apt-get update
-      sudo apt-get install -y g++-multilib
+      sudo apt-get install -y openjdk-8-jdk g++-multilib
     SHELL
   end
 
   config.vm.define "windows" do |config|
     config.vm.box = "modernIE/w10-edge"
-    config.vm.network "private_network", ip: "192.168.33.11"
+    config.vm.network "private_network", type: "dhcp"
+  end
 
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   sudo apt-get update
-  #   sudo apt-get install -y apache2
-  # SHELL
+  config.vm.define "freebsd" do |config|
+    config.vm.box = "freebsd/FreeBSD-10.2-STABLE"
+  # config.vm.network "private_network", type: "dhcp"
+    config.ssh.shell = 'csh'
+
+  # config.vm.synced_folder ".", "/vagrant", :nfs => true, id: "vagrant-root"
+
+    config.vm.provision "shell", inline: <<-SHELL
+      fetch -arRo /tmp/ https://download.freebsd.org/ftp/releases/amd64/10.2-RELEASE/lib32.txz
+      tar -xpf /tmp/lib32.txz -C /
+      pkg install -y openjdk8
+      sudo mount -t fdescfs fdesc /dev/fd
+      sudo mount -t procfs proc /proc
+      rehash
+    SHELL
   end
 
 end
