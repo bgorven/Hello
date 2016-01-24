@@ -16,13 +16,26 @@
 
 package org.hyperic.jni;
 
-public class ArchLoaderException extends Exception {
+public class ArchLoaderException extends RuntimeException {
+	private static final long serialVersionUID = 1L;
 
-    public ArchLoaderException() {
+	public ArchLoaderException() {
         super();
     }
 
     public ArchLoaderException(String msg) {
         super(msg);
     }
+
+	public ArchLoaderException(Throwable cause) {
+		super(cause);
+	}
+
+	public ArchLoaderException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public ArchLoaderException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
+	}
 }

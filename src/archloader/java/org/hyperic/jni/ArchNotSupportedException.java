@@ -16,9 +16,10 @@
 
 package org.hyperic.jni;
 
-public class ArchNotSupportedException extends Exception {
+public class ArchNotSupportedException extends ArchLoaderException {
+	private static final long serialVersionUID = 1L;
 
-    public ArchNotSupportedException() {
+	public ArchNotSupportedException() {
         super();
     }
 
