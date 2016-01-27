@@ -47,8 +47,8 @@ def jni = {
 model {
 
     platforms {
-        ['windows', 'linux', 'osx', 'freebsd', 'solaris'].each { os ->
-            ['x86', 'x64', 'arm'].each { arch ->
+        ['windows', 'linux', 'osx', 'freebsd-10', 'solaris'].each { os ->
+            ['x64', 'arm'].each { arch ->
                 "$os-$arch" {
                     architecture arch
                     operatingSystem os
@@ -95,10 +95,10 @@ model {
 
         copyLibs(Copy) {
             into 'src/main/resources/lib'
-            
+
             ($.binaries.withType(SharedLibraryBinary)).each {
                 lib ->
-                
+
                 if (lib.buildable) {
                     from lib.sharedLibraryFile, {
                         into "${lib.targetPlatform.name}"
@@ -126,6 +126,7 @@ model {
             main = 'org.bven.hello.Native'
         }
 
+        def runs = []
         ['linux', 'windows', 'freebsd'].each { os ->
 
             "${os}Up"(VagrantUp) {
@@ -134,13 +135,18 @@ model {
 
             "${os}Run"(Vagrant) {
                 dependsOn "${os}Up"
-                commands = ['ssh', os, '-c', '/vagrant/gradlew -p /vagrant run']
+                commands = ['ssh', os, '-c', '/vagrant/gradlew -p /vagrant --project-cache-dir /tmp run']
+                runs.add it
             }
 
             "${os}Halt"(VagrantHalt) {
                 mustRunAfter "${os}Run"
                 commands.add os
             }
+        }
+
+        build {
+          dependsOn runs
         }
 
         wrapper {
