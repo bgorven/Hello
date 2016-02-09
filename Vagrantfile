@@ -16,18 +16,14 @@ Vagrant.configure 2 do |config|
     config.vm.box = "ubuntu/trusty64"
     config.vm.network "private_network", ip: "10.1.1.10"
 
-    config.vm.provision "shell", inline: <<-SHELL
-      sudo add-apt-repository -y ppa:openjdk-r/ppa
-      sudo apt-get update
-      sudo apt-get install -y openjdk-8-jdk g++-multilib
-    SHELL
+    config.vm.provision "shell", path: "provisioning/linux.sh"
   end
 
   config.vm.define "windows" do |config|
     config.vm.box = "modernIE/w10-edge"
   # config.vm.box = "senglin/win-10-enterprise-vs2015community"
     config.vm.network "private_network", ip: "10.1.1.11"
-    config.vm.network :forwarded_port, host: 2222, guest: 22
+    config.vm.network :forwarded_port, host: 22222, guest: 22
 
     config.ssh.insert_key = true
     config.ssh.sudo_command = "%c"
@@ -57,15 +53,7 @@ Vagrant.configure 2 do |config|
       vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
     end
 
-    config.vm.provision "shell", inline: <<-SHELL
-      pkg update
-      pkg upgrade
-      pkg install -y gcc openjdk8 ca_root_nss
-      mount -t fdescfs fdesc /dev/fd
-      mount -t procfs proc /proc
-      echo 'fdesc /dev/fd fdescfs rw 0 0' >> /etc/fstab
-      echo 'proc /proc procfs rw 0 0' >> /etc/fstab
-    SHELL
+    config.vm.provision "shell", path: "provisioning/freebsd.sh"
   end
 
 end
