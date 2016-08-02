@@ -1,11 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
-Vagrant.configure(2) do |config|
+Vagrant.configure 2 do |config|
 
   config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
@@ -18,35 +14,46 @@ Vagrant.configure(2) do |config|
 
   config.vm.define "linux" do |config|
     config.vm.box = "ubuntu/trusty64"
-    config.vm.network "private_network", type: "dhcp"
+    config.vm.network "private_network", ip: "10.1.1.10"
 
-    config.vm.provision "shell", inline: <<-SHELL
-      sudo add-apt-repository -y ppa:openjdk-r/ppa
-      sudo apt-get update
-      sudo apt-get install -y openjdk-8-jdk g++-multilib
-    SHELL
+    config.vm.provision "shell", path: "provisioning/linux.sh"
   end
 
   config.vm.define "windows" do |config|
     config.vm.box = "modernIE/w10-edge"
-    config.vm.network "private_network", type: "dhcp"
+  # config.vm.box = "senglin/win-10-enterprise-vs2015community"
+    config.vm.network "private_network", ip: "10.1.1.11"
+    config.vm.network :forwarded_port, host: 22222, guest: 22
+
+    config.ssh.insert_key = true
+    config.ssh.sudo_command = "%c"
+    config.ssh.username = "IEUser"
+  # config.ssh.password = "Passw0rd!"
+
+    config.vm.provision :shell, path: "provisioning/windows.cmd"
   end
 
   config.vm.define "freebsd" do |config|
-    config.vm.box = "freebsd/FreeBSD-10.2-STABLE"
-  # config.vm.network "private_network", type: "dhcp"
+    config.vm.guest = :freebsd
+    config.vm.network "private_network", ip: "10.1.1.12"
     config.ssh.shell = 'csh'
 
-  # config.vm.synced_folder ".", "/vagrant", :nfs => true, id: "vagrant-root"
+    config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", nfs: true
 
-    config.vm.provision "shell", inline: <<-SHELL
-      fetch -arRo /tmp/ https://download.freebsd.org/ftp/releases/amd64/10.2-RELEASE/lib32.txz
-      tar -xpf /tmp/lib32.txz -C /
-      pkg install -y openjdk8
-      sudo mount -t fdescfs fdesc /dev/fd
-      sudo mount -t procfs proc /proc
-      rehash
-    SHELL
+    config.vm.provider :virtualbox do |vb, override|
+      override.vm.box_url = "https://wunki.org/files/freebsd-10.2-amd64-wunki.box"
+      override.vm.box = "freebsd-10.2-amd64-wunki"
+
+    # vb.customize ["startvm", :id, "--type", "gui"]
+      vb.customize ["modifyvm", :id, "--memory", "512"]
+      vb.customize ["modifyvm", :id, "--cpus", "2"]
+      vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+      vb.customize ["modifyvm", :id, "--audio", "none"]
+      vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+      vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
+    end
+
+    config.vm.provision "shell", path: "provisioning/freebsd.sh"
   end
 
 end

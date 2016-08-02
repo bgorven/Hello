@@ -1,0 +1,11 @@
+# need to open these ports for nfsd
+sudo iptables -A INPUT -p tcp -m tcp --dport 2049 -j ACCEPT
+sudo iptables -A INPUT -p tcp -m tcp --dport 20048 -j ACCEPT
+sudo iptables -A INPUT -p udp -m udp --dport 111 -j ACCEPT
+sudo iptables -A INPUT -p udp -m udp --dport 2049 -j ACCEPT
+sudo iptables -A INPUT -p udp -m udp --dport 20048 -j ACCEPT
+
+# if using custom kernel, here's how to build vbox modules
+sudo pacman -S virtualbox-host-dkms
+echo /usr/src/vboxhost* # Show the version number to put in the following command
+sudo dkms install vboxhost/5.0.14

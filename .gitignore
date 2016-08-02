@@ -1,7 +1,19 @@
-
 src/main/resources/deleteme
 
-# Created by https://www.gitignore.io/api/gradle,java,c++,eclipse,vagrant
+# Created by https://www.gitignore.io/api/gradle,java,c++,eclipse,vagrant,linux,windows
+
+### Gradle ###
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
 
 ### Java ###
 *.class
@@ -50,9 +62,8 @@ hs_err_pid*
 
 
 ### Eclipse ###
-*.pydevproject
+
 .metadata
-.gradle
 bin/
 tmp/
 *.tmp
@@ -72,7 +83,10 @@ local.properties
 # Locally stored "Eclipse launch configurations"
 *.launch
 
-# CDT-specific
+# PyDev specific (Python IDE for Eclipse)
+*.pydevproject
+
+# CDT-specific (C/C++ Development Tooling)
 .cproject
 
 # JDT-specific (Eclipse Java Development Tools)
@@ -81,7 +95,7 @@ local.properties
 # Java annotation processor (APT)
 .factorypath
 
-# PDT-specific
+# PDT-specific (PHP Development Tools)
 .buildpath
 
 # sbteclipse plugin
@@ -93,22 +107,41 @@ local.properties
 # STS (Spring Tool Suite)
 .springBeans
 
-### Gradle ###
-.gradle
-build/
-!gradle
-
-# Ignore Gradle GUI config
-gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Include libraries via git-lfs
-!src/main/resources/**
-
-# Cache of project
-.gradletasknamecache
 
 ### Vagrant ###
 .vagrant/
+
+
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+
+### Windows ###
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
