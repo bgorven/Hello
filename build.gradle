@@ -132,25 +132,29 @@ model {
             mustRunAfter "allUp"
         }
 
-        def runs = []
         ['linux', 'windows', 'freebsd'].each { os ->
             "${os}Up"(VagrantUp) {
                 commands.add os
             }
 
+            "${os}Build"(Vagrant) {
+                dependsOn "${os}Up"
+                commands = ['ssh', os, '-c', "/vagrant/gradlew -p /vagrant -PbuildDir='${os}Build' --project-cache-dir /tmp mainJar"]
+            }
+
             "${os}Run"(Vagrant) {
                 dependsOn "${os}Up"
                 commands = ['ssh', os, '-c', "/vagrant/gradlew -p /vagrant -PbuildDir='${os}Build' --project-cache-dir /tmp run"]
-                println runs
-                runs.add it
             }
-            build.dependsOn "${os}Run"
-            allHalt.mustRunAfter "${os}Run"
 
             "${os}Halt"(VagrantHalt) {
                 mustRunAfter "${os}Run"
                 commands.add os
             }
+
+            build.dependsOn "${os}Build"
+            build.dependsOn "${os}Halt"
+            allHalt.dependsOn "${os}Halt"
         }
 
         wrapper {
