@@ -3,3 +3,7 @@ jdk: oraclejdk8
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y g++-multilib
+after_success:
+  - git commit -am 'successful build'
+  - git rebase origin builds
+  - git push origin builds
