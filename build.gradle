@@ -52,7 +52,7 @@ class JNIRules extends RuleSource {
         libs.each { lib ->
             def headerDir = "src/${lib.baseName}/headers"
             def targets = binaries.findAll{ it.library.name == lib.library }
-            def classpath = String.join(File.pathSeparator, targets.collect{ it.classesDir.toString() })
+            def classpath = targets.collect{ it.classesDir }.join(File.pathSeparator)
 
             tasks.create("${lib.baseName}Javah", JavahCompile) { task ->
                 commandLine(["javah", "-d", headerDir, "-classpath", classpath] + lib.classes.collect{ "${lib.pkg}.${it}" })
