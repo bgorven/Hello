@@ -95,10 +95,6 @@ repositories {
 }
 
 model {
-    toolChains {
-        clang(Clang)
-    }
-
     platforms {
         ['windows', 'linux', 'osx', 'freebsd-10', 'solaris'].each { os ->
             ['x86', 'x64', 'arm'].each { arch ->
