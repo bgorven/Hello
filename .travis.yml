@@ -7,3 +7,8 @@ after_success:
   - git commit -am 'successful build'
   - git rebase origin builds
   - git push origin builds
+branches:
+  only: master
+os:
+  - linux
+  - osx
