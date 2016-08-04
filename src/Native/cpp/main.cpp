@@ -1,4 +1,3 @@
-#include "main.h"
 #include "org_bven_hello_Native.h"
 
 #include <iostream>
