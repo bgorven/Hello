@@ -14,28 +14,25 @@ Vagrant.configure 2 do |config|
 
   config.vm.define "linux" do |config|
     config.vm.box = "ubuntu/trusty64"
-    config.vm.network "private_network", ip: "10.1.1.10"
 
     config.vm.provision "shell", path: "provisioning/linux.sh"
   end
 
   config.vm.define "windows" do |config|
-    config.vm.box = "modernIE/w10-edge"
-  # config.vm.box = "senglin/win-10-enterprise-vs2015community"
-    config.vm.network "private_network", ip: "10.1.1.11"
+    config.vm.box = "Microsoft/EdgeOnWindows10"
+  # config.vm.network "private_network", ip: "10.1.1.11"
     config.vm.network :forwarded_port, host: 22222, guest: 22
 
     config.ssh.insert_key = true
     config.ssh.sudo_command = "%c"
-    config.ssh.username = "IEUser"
-  # config.ssh.password = "Passw0rd!"
+    config.ssh.shell = 'sh'
 
     config.vm.provision :shell, path: "provisioning/windows.cmd"
   end
 
   config.vm.define "freebsd" do |config|
     config.vm.guest = :freebsd
-    config.vm.network "private_network", ip: "10.1.1.12"
+  # config.vm.network "private_network", ip: "10.1.1.12"
     config.ssh.shell = 'csh'
 
     config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", nfs: true

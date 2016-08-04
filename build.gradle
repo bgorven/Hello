@@ -11,6 +11,7 @@ vagrant.installation.validate = false
 
 version = '0.0'
 group = 'org.bven'
+ext.nativePackage = 'org.bven.hello'
 
 // Process resources task doesn't get created if there aren't any resources; create a placeholder to ensure that it does.
 def placeholder = file('src/main/resources/deleteme')
@@ -44,11 +45,20 @@ def jni = {
     new ExternalLibrary(includes, project.files(), project.files())
 }()
 
+@Managed interface JNILibrarySpec extends NativeLibrarySpec {
+    void setNativeClass(String nativeClass);
+    String getNativeClass();
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+}
+
 model {
 
     platforms {
         ['windows', 'linux', 'osx', 'freebsd-10', 'solaris'].each { os ->
-            ['x64', 'arm'].each { arch ->
+            ['x86', 'x64', 'arm'].each { arch ->
                 "$os-$arch" {
                     architecture arch
                     operatingSystem os
@@ -58,13 +68,14 @@ model {
     }
 
     components {
-        archloader(JvmLibrarySpec)
         main(JvmLibrarySpec) {
             dependencies { 
-                library 'archloader'
+                module 'com.github.bgorven:Loader:1.0.0'
             }
         }
-        hello(NativeLibrarySpec) { library ->
+        Native(JNILibrarySpec) { library ->
+            nativeClass "org.bven.hello.Native"
+
             $.platforms.all {
                 library.targetPlatform it.name
             }
@@ -77,10 +88,11 @@ model {
 
     tasks {
         javah(Exec) {
-            ['hello'].each{ name ->
+            $.components.withType(JNILibrarySpec).each{ lib ->
 
+                def name = lib.baseName
                 def nativeIncludes = "src/${name}/headers"
-                def mainClassName = "${project.group}.${name}.Native"
+                def mainClassName = "${lib.nativeClass}"
                 def classes = $.tasks.compileMainJarMainJava
                 def classpath = "${classes.destinationDir}"
 
@@ -94,9 +106,9 @@ model {
         }
 
         copyLibs(Copy) {
-            into 'src/main/resources/lib'
+            into "src/main/resources/lib/${nativePackage}"
 
-            ($.binaries.withType(SharedLibraryBinary)).each {
+            $.binaries.withType(SharedLibraryBinarySpec).each {
                 lib ->
 
                 if (lib.buildable) {
@@ -104,6 +116,9 @@ model {
                         into "${lib.targetPlatform.name}"
                     }
                     dependsOn lib.tasks
+                    println "${lib} buildable"
+                } else {
+                    println "${lib} not buildable"
                 }
             }
         }
@@ -132,19 +147,28 @@ model {
             mustRunAfter "allUp"
         }
 
+        //I don't know how to get the list of boxes from the Vagrantfile :(
         ['linux', 'windows', 'freebsd'].each { os ->
             "${os}Up"(VagrantUp) {
                 commands.add os
             }
+            
+            def gradleTask = { task ->
+                if (os == 'windows') {
+                    return ['ssh', os, '-c', "/vagrant/gradlew.bat -p 'c:\\vagrant' -PbuildDir='${os}Build' --project-cache-dir /tmp ${task}"]
+                } else {
+                    return ['ssh', os, '-c', "/vagrant/gradlew -p /vagrant -PbuildDir='${os}Build' --project-cache-dir /tmp ${task}"]
+                }
+            }
 
             "${os}Build"(Vagrant) {
                 dependsOn "${os}Up"
-                commands = ['ssh', os, '-c', "/vagrant/gradlew -p /vagrant -PbuildDir='${os}Build' --project-cache-dir /tmp mainJar"]
+                commands = gradleTask('mainJar')
             }
 
             "${os}Run"(Vagrant) {
                 dependsOn "${os}Up"
-                commands = ['ssh', os, '-c', "/vagrant/gradlew -p /vagrant -PbuildDir='${os}Build' --project-cache-dir /tmp run"]
+                commands = gradleTask('run')
             }
 
             "${os}Halt"(VagrantHalt) {
@@ -158,7 +182,7 @@ model {
         }
 
         wrapper {
-            gradleVersion = '2.10'
+            gradleVersion = '3.0-rc-1'
         }
     }
 

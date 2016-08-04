@@ -2,14 +2,12 @@ package org.bven.hello;
 
 import java.io.*;
 import java.nio.file.*;
-import org.hyperic.jni.*;
+import org.bven.jni.*;
 
 public class Native {
 
     static {
-        try (ArchLoader loader = new ArchLoader(Native.class)) {
-            System.load(loader.getLibFile());
-        }
+        ArchLoader.load(Native.class);
 	}
 
     private native static String getGreeting();
