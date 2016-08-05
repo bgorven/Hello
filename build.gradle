@@ -26,8 +26,8 @@ class VS2015 implements NativeDependencySet {
 
     VS2015(Project project) {
         includeRoots = project.files "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10586.0/ucrt"
-        linkFiles = project.files "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.10150.0/ucrt"
-        runtimeFiles = project.files()
+        linkFiles = project.files()
+        runtimeFiles = project.files "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.10586.0/ucrt"
     }
 }
 
@@ -50,7 +50,7 @@ model {
     toolChains {
         //https://discuss.gradle.org/t/automatic-detection-of-visual-studio-community-2015-rc-not-working-properly/10309
         visualCpp(VisualCpp) {
-            installDir "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
+            installDir "C:/Program Files (x86)/Microsoft Visual Studio 14.0"
         }
     }
 
