@@ -19,6 +19,17 @@ if (!placeholder.exists()) {
 }
 placeholder.deleteOnExit()
 
+class VS2015 implements NativeDependencySet {
+    final FileCollection includeRoots
+    final FileCollection linkFiles
+    final FileCollection runtimeFiles
+
+    VS2015(Project project) {
+        includeRoots = project.files "C:/Program Files (x86)/Windows Kits/10/Include/10.0.10586.0/ucrt"
+        linkFiles = project.files "C:/Program Files (x86)/Windows Kits/10/Lib/10.0.10150.0/ucrt"
+        runtimeFiles = project.files()
+    }
+}
 
 repositories {
     maven { url "https://jitpack.io" }
@@ -27,12 +38,19 @@ repositories {
 model {
     platforms {
         ['windows', 'linux', 'osx', 'freebsd-10', 'solaris'].each { os ->
-            ['x86', 'x64'].each { arch ->
+            ['x86', 'x64', 'arm'].each { arch ->
                 "$os-$arch" {
                     architecture arch
                     operatingSystem os
                 }
             }
+        }
+    }
+    
+    toolChains {
+        //https://discuss.gradle.org/t/automatic-detection-of-visual-studio-community-2015-rc-not-working-properly/10309
+        visualCpp(VisualCpp) {
+            installDir "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0"
         }
     }
 
@@ -53,6 +71,7 @@ model {
 
             binaries.all {
                 lib new JNIDependency(project)
+                lib new VS2015(project)
             }
         }
     }
