@@ -15,6 +15,7 @@ plugins {
     id 'org.bven.jniplugin' version '0.0.2'
 }
 
+import java.nio.file.*
 import com.amazonaws.services.s3.transfer.TransferManager
 
 version = '0.0'
@@ -98,16 +99,30 @@ model {
             main = 'org.bven.hello.Native'
         }
 
-        uploadNativeLibs(Task) {
-            dependsOn $.tasks.mainJar
-            doLast {
-                def hash = 'git rev-parse --short HEAD'.execute().text
-                new TransferManager().uploadDirectory('bgorven-hello', hash, project.file('src/main/resources/lib'), true).waitForCompletion()
+        def hash = 'git rev-parse --short HEAD'.execute().text.trim()
+        def branch = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+        if (branch == 'develop') {
+            s3LibSync(Task) {
+                dependsOn $.tasks.processMainJarMainResources
+                doLast {
+                    new TransferManager().uploadDirectory('bgorven-hello', hash, project.file('src/main/resources/lib'), true).waitForCompletion()
+                }
             }
-        }
 
-        build {
-            dependsOn $.tasks.uploadNativeLibs
+            build {
+                dependsOn $.tasks.s3LibSync
+            }
+        } else if (branch == 'master') {
+            s3LibSync(Task) {
+                doLast {
+                    new TransferManager().downloadDirectory('bgorven-hello', hash, project.buildDir).waitForCompletion()
+                    Files.move(project.buildDir.toPath().resolve(hash), project.file('src/main/resources/lib').toPath(), StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+            
+            processMainJarMainResources {
+                dependsOn $.tasks.s3LibSync
+            }
         }
 
         wrapper {
