@@ -102,11 +102,13 @@ model {
             dependsOn $.tasks.mainJar
             doLast {
                 def hash = 'git rev-parse --short HEAD'.execute().text
-                println hash
                 new TransferManager().uploadDirectory('bgorven-hello', hash, project.file('src/main/resources/lib'), true).waitForCompletion()
             }
         }
 
+        build {
+            dependsOn $.tasks.uploadNativeLibs
+        }
 
         wrapper {
             gradleVersion = '3.0-rc-1'
