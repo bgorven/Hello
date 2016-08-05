@@ -62,7 +62,14 @@ model {
                 if (targetPlatform.operatingSystem.windows) {
                     // https://github.com/couchbase/couchbase-lite-java-native/issues/23
                     cppCompiler.args "/IC:/Program Files (x86)/Windows Kits/10/Include/10.0.10586.0/ucrt"
-                    linker.args "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.10586.0/ucrt/${targetPlatform.architecture.name}"
+                    def arch = if (targetPlatform.architecture.name.contains 'arm') {
+                        'arm'
+                    } else if (targetPlatform.architecture.name.contains '64') {
+                        'x64'
+                    } else {
+                        'x86'
+                    }
+                    linker.args "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/Lib/10.0.10586.0/ucrt/${arch}"
                 }
             }
         }
