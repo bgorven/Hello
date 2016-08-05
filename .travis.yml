@@ -2,14 +2,17 @@ language: java
 after_success: echo done
 deploy:
   provider: s3
-  access_key_id: "AKIAJZJVZJJHPCFWHC5A"
-  secret_access_key: 
-    secure: "eEfGc4bUQL2q84302MS5Sx922R6BtfNG0iubyabE1DlayMiHKx14p7kSDU5GwGufJfz5VUVdh+NuaTNovxvVceba/XlZMs1nw9LmS6Vc9/N18H/G9HU+X/dcQaCxEPZ4tRp1RYDj6Z9OKQo5RaZ3uKzkFR99CbWne5N5Blox2AVtPtprq8SvXaobdWpfXxDyCNQXc6UZZwPcNiXfWePuvJtBjF5F/bIdaOGnlvwf8jJyhef/GU3dCwChMieJ35epUwoiT0o9uUXas4ByU+Q9PKKxp6sEPZYYzCtQwm0PT1Pagn2XNGa613cwc2aicFI6QQksWMExTOiNOvqDAp5kt63kAIBYp/lz7eyGypnZ7QY4W0UULd0VYfPeRfa4s03CF9/xzK6sPoxFFSsNZHjYaAgFVXrFKMuH65jB03tPlx5SA+IT9r4j0Vail2oOAzzTlWqaB2/GpoQ1rrbfOHQMDw6D98mbyKb2PIy+UC/kRpPlj78o6mmLTx+c0HGBGpd9rAatz2Ecaz850gfmeYkzYmSuDJNVfFvhgAQRGfIvww/RmL7g7gAD/JioJ9IOFlS3A7WYNgOxJSf54HdUM6M05gSlZD6EEZ1WqLc6MxZ8YXHSrUy8RspM4MQ9Wj/r2PqExypJX18G+LfwidSWPhSVwsYfOxHi3HJfIg9NKu56wa8="
-  bucket: "bgorven-hello"
+  access_key_id: AKIAJZJVZJJHPCFWHC5A
+  secret_access_key:
+    secure: hzw7e0YxSyzi7T+GRO8gaAW2EGbTPPdHvIjRdF5v+Tskw7khWSk7eb/+fKtlidsHz+aHiDCivLAWsrfzHjaDvNc1ljjYveYqvUXzxwhqmDP89f9+FpyiMcRu5pngKrS4JhvwrcjCHj3tNoYblZ+sd9tbo4Od7efmjOsK5qM7VikBt62aBG//YUnOnq7g+2uKZgXAUSi/wztspS8OjbcUgTmtdHHMaQweDoe0SV608T7AySvVxz3fe+KAov9zszS5eYGgxyqxtNEsTfiO71gMQ08bn0NRrj0u3+oOm5+GNKNjdE5bd+6xn6rLD5Acdd51remVDSQ4QukoBymbg2HLm//+4P7tvcfNrlpSUwY+UnqwspN3X38e2A3wcIaTIE10Ycv2YU4GTGlpTJUhZ6h+prujt8z6BDqHq7fnv+UOVBJc3D48WuBgt8NFbjBz0dNuTNDW/wgnrjw7Hu4aRNMdH27h2XWmNV3D5o1wQmFNR465e194Ki2nSqBDX3amKw9BuRK9gHo8AgwXg93KiAL2Go4p3UdUImiLba8niaNTApGuVEIHteK9cM5P8Ymz4xpVCkSIXrJ/560w3ovMqRIeFE4OA8pVbUct7Ydp1fE1MTDX17WJPm6cUFM/6FHAgGFb/qXfPF43gAh+Zjm7Bu0vmI8v5ogSVEIZ38axfjn7GtY=
+  bucket: bgorven-hello
   skip_cleanup: true
 matrix:
   include:
-   - os: osx
-     osx_image: xcode8
-   - os: linux
-     jdk: oraclejdk8
+  - os: osx
+    osx_image: xcode8
+  - os: linux
+    jdk: oraclejdk8
+    before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install -y g++-multilib
