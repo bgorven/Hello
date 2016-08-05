@@ -34,11 +34,13 @@ model {
             }
         }
     }
-    
+
     toolChains {
-        //https://discuss.gradle.org/t/automatic-detection-of-visual-studio-community-2015-rc-not-working-properly/10309
-        visualCpp(VisualCpp) {
-            installDir "C:/Program%20Files%20(x86)/Microsoft%20Visual%20Studio%2014.0"
+        if (project.hasProperty('vs2015')) {
+            //https://discuss.gradle.org/t/automatic-detection-of-visual-studio-community-2015-rc-not-working-properly/10309
+            visualCpp(VisualCpp) {
+                installDir "C:/Program%20Files%20(x86)/Microsoft%20Visual%20Studio%2014.0"
+            }
         }
     }
 
@@ -59,7 +61,7 @@ model {
 
             binaries.all {
                 lib new JNIDependency(project)
-                if (targetPlatform.operatingSystem.windows) {
+                if (project.hasProperty('vs2015') && targetPlatform.operatingSystem.windows) {
                     // https://github.com/couchbase/couchbase-lite-java-native/issues/23
                     cppCompiler.args "/IC:/Program Files (x86)/Windows Kits/10/Include/10.0.10586.0/ucrt"
                     def arch = {if (targetPlatform.architecture.name.contains('arm')) {
