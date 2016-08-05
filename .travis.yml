@@ -1,6 +1,15 @@
 language: java
-after_success: echo $ASDF
-env:
-  secure: "xMwCJBl52fCXbnFWU52MvidZTOK5CXKwHejFnsnjpYDIjE+koLqqn+KBA8wVADUIjm876ieNSM8w+levVlffYUGPlTa5xB4bGV8rcd1mrK2YBNKCfXimW/+cNUOgZBTKGYnh97lVw1LY2mapBOEB+iS/MDE/g1sBKM/gIxcJSL6wbA9FeH7GwAmde93rQmB6u4XVjzoJXOIyFCsBDRC3GZPOSMI8EUJgVLPnX7EqW4x4bBhImmjosq61K1miqluGNkIXAQDVeS6iaxsbsXGA+fPaUdg8aqFXlYMCZ19bQPebtnHIi1lMMYQXMK9HV1jlXIniXYktbXs/ITYueOdgsHoC+pVRlNDztMgrDh3XGDDsi5Nk3UgHgptuved8sfnDjgoDcQu7Ui6c82vxtSiI2H0SyfcVOJKbp/Tf/r10sQMA62kEEfpy6t8bYYC+GfnTidyAWmEEi6ePG2jNYr88bI48Ovhfl0fWlaA6Q0NtPlRhZ/vS7mdqKu52VOHRp3DZsnPN+iM3qSDX0aQLlX/p0lA2qsnvRVdoqihaAyUdxPhJA6cN4WQiZ/4nPh11WcV5Kd7fNrUUEyd+IlBy68GL6VPOmVuEBMAGULmDvVaN1K9rpqUl+o9kB9YQjqlj6hUtN/Ggr38R2D6al/g8H7IqlNOvuFvBT8yYvUw1CKASWUA="
-os: osx
-osx_image: xcode8
+after_success: echo done
+deploy:
+  provider: s3
+  access_key_id: "AKIAJZJVZJJHPCFWHC5A"
+  secret_access_key: 
+    secure: "eEfGc4bUQL2q84302MS5Sx922R6BtfNG0iubyabE1DlayMiHKx14p7kSDU5GwGufJfz5VUVdh+NuaTNovxvVceba/XlZMs1nw9LmS6Vc9/N18H/G9HU+X/dcQaCxEPZ4tRp1RYDj6Z9OKQo5RaZ3uKzkFR99CbWne5N5Blox2AVtPtprq8SvXaobdWpfXxDyCNQXc6UZZwPcNiXfWePuvJtBjF5F/bIdaOGnlvwf8jJyhef/GU3dCwChMieJ35epUwoiT0o9uUXas4ByU+Q9PKKxp6sEPZYYzCtQwm0PT1Pagn2XNGa613cwc2aicFI6QQksWMExTOiNOvqDAp5kt63kAIBYp/lz7eyGypnZ7QY4W0UULd0VYfPeRfa4s03CF9/xzK6sPoxFFSsNZHjYaAgFVXrFKMuH65jB03tPlx5SA+IT9r4j0Vail2oOAzzTlWqaB2/GpoQ1rrbfOHQMDw6D98mbyKb2PIy+UC/kRpPlj78o6mmLTx+c0HGBGpd9rAatz2Ecaz850gfmeYkzYmSuDJNVfFvhgAQRGfIvww/RmL7g7gAD/JioJ9IOFlS3A7WYNgOxJSf54HdUM6M05gSlZD6EEZ1WqLc6MxZ8YXHSrUy8RspM4MQ9Wj/r2PqExypJX18G+LfwidSWPhSVwsYfOxHi3HJfIg9NKu56wa8="
+  bucket: "bgorven-hello"
+  skip_cleanup: true
+matrix:
+  include:
+   - os: osx
+     osx_image: xcode8
+   - os: linux
+     jdk: oraclejdk8
