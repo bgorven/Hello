@@ -38,7 +38,7 @@ model {
     toolChains {
         //https://discuss.gradle.org/t/automatic-detection-of-visual-studio-community-2015-rc-not-working-properly/10309
         visualCpp(VisualCpp) {
-            installDir "C:/Program Files (x86)/Microsoft Visual Studio 14.0"
+            installDir "C:/Program%20Files%20(x86)/Microsoft%20Visual%20Studio%2014.0"
         }
     }
 
