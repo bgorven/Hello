@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.11.24'
+    }
+}
+
 plugins {
     id 'jvm-component'
     id 'java-lang'
@@ -5,6 +14,8 @@ plugins {
     id 'maven-publish'
     id 'org.bven.jniplugin' version '0.0.2'
 }
+
+import com.amazonaws.services.s3.transfer.TransferManager
 
 version = '0.0'
 group = 'org.bven'
@@ -39,7 +50,7 @@ model {
         if (project.hasProperty('vs2015')) {
             //https://discuss.gradle.org/t/automatic-detection-of-visual-studio-community-2015-rc-not-working-properly/10309
             visualCpp(VisualCpp) {
-                installDir "C:/Program%20Files%20(x86)/Microsoft%20Visual%20Studio%2014.0"
+                installDir "C:/Program Files (x86)/Microsoft Visual Studio 14.0"
             }
         }
     }
@@ -86,6 +97,16 @@ model {
             classpath jar.outputs
             main = 'org.bven.hello.Native'
         }
+
+        uploadNativeLibs(Task) {
+            dependsOn $.tasks.mainJar
+            doLast {
+                def hash = 'git rev-parse --short HEAD'.execute().text
+                println hash
+                new TransferManager().uploadDirectory('bgorven-hello', hash, project.file('src/main/resources/lib'), true).waitForCompletion()
+            }
+        }
+
 
         wrapper {
             gradleVersion = '3.0-rc-1'
