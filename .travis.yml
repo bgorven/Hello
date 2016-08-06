@@ -15,7 +15,7 @@ matrix:
   include:
   - os: osx
     osx_image: xcode8
-    script: ./gradlew upload build -PnoDownload && tree src/main/resources
+    script: ./gradlew upload -PnoDownload && ls src/main/resources/lib/*/
   - os: linux
-    script: ./gradlew upload build -PnoDownload && tree src/main/resources
+    script: ./gradlew upload -PnoDownload && ls src/main/resources/lib/*/
     jdk: oraclejdk8
