@@ -1,4 +1,5 @@
 src/main/resources/deleteme
+src/main/resources/lib/
 
 # Created by https://www.gitignore.io/api/gradle,java,c++,eclipse,vagrant,linux,windows
 

@@ -12,11 +12,13 @@ plugins {
     id 'java-lang'
     id 'cpp'
     id 'maven-publish'
-    id 'org.bven.jniplugin' version '0.0.2'
+    id 'org.bven.jniplugin' version '0.0.5'
 }
 
 import java.nio.file.*
 import com.amazonaws.services.s3.transfer.TransferManager
+def aws_bucket='bgorven-hello'
+def aws_region=System.env.AWS_DEFAULT_REGION
 
 version = '0.0'
 group = 'org.bven'
@@ -62,10 +64,9 @@ model {
                 module 'com.github.bgorven:Loader:1.0.0'
             }
         }
-        Native(JNILibrarySpec) { jniLibSpec ->
+        'native'(JNILibrarySpec) { jniLibSpec ->
             library "main"
-            pkg "org.bven.hello"
-            classes ["Native"]
+            nativeClass "org.bven.hello.Native"
 
             $.platforms.all {
                 jniLibSpec.targetPlatform it.name
@@ -103,13 +104,13 @@ model {
         upload(Task) {
             dependsOn $.tasks.processMainJarMainResources
             doLast {
-                new TransferManager().uploadDirectory('bgorven-hello', hash, project.file('src/main/resources/lib'), true).waitForCompletion()
+                new TransferManager().uploadDirectory(aws_bucket, hash, project.file('src/main/resources/lib'), true).waitForCompletion()
             }
         }
 
         download(Task) {
             doLast {
-                def url = 'https://s3-ap-southeast-2.amazonaws.com/bgorven-hello'
+                def url = "https://${aws_bucket}.s3-${aws_region}.amazonaws.com"
                 new XmlSlurper().parse(new URL("${url}?prefix=${hash}/").openStream()).Contents.Key.each { key ->
                     def dest = project.file('src/main/resources/lib/' + "${key}".replace("${hash}/", ''))
                     dest.parentFile.mkdirs()
