@@ -3,6 +3,9 @@ sudo: false
 addons:
   apt:
     packages: g++-multilib
+branches:
+  only:
+  - develop
 env:
   global:
   - AWS_DEFAULT_REGION=ap-southeast-2
@@ -12,19 +15,7 @@ matrix:
   include:
   - os: osx
     osx_image: xcode8
-    script: ./gradlew upload build -PnoDownload
-    branches:
-      only:
-      - develop
+    script: ./gradlew upload build -PnoDownload && tree src/main/resources
   - os: linux
-    script: ./gradlew upload build -PnoDownload
+    script: ./gradlew upload build -PnoDownload && tree src/main/resources
     jdk: oraclejdk8
-    branches:
-      only:
-      - develop
-  - os: linux
-    script: ./gradlew build
-    jdk: oraclejdk8
-    branches:
-      except:
-      - develop

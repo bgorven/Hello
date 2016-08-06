@@ -61,7 +61,7 @@ model {
     components {
         main(JvmLibrarySpec) {
             dependencies {
-                module 'com.github.bgorven:Loader:1.0.0'
+                module 'com.github.bgorven:Loader:0.0.2'
             }
         }
         'native'(JNILibrarySpec) { jniLibSpec ->

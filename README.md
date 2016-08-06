@@ -8,7 +8,7 @@ Creating a new project with this template:
 
 - [ ] change nativeClass property of JNILibrarySpec component
 - [ ] optionally, rename JNILibrarySpec component (e.g for `nativeClass "com.example.FooBar"`, `'native'(JNILibrarySpec)` -> `fooBar(JNILibrarySpec)`)
-- [ ] if you renamed the component, move the native sources (e.g `mv src/native/ src/fooBar`)
+- [ ] if you renamed the component, move the native sources (e.g `mv src/native/ src/fooBar/`)
 - [ ] if you have more native classes, create additional components and source dirs.
 - [ ] run `./gradlew nativeJavah` (or fooBarJavah, etc) to generate headers from your java class
 - [ ] gradle build puts it all together (also runs all javah tasks, to ensure headers are up to date)
@@ -19,8 +19,8 @@ Creating a new project with this template:
 - [ ] update aws_bucket var in build.gradle
 - [ ] generate [AWS access keys](https://console.aws.amazon.com/iam/home?#security_credential)
 - [ ] update .travis.yml env.global keys
-- [ ] echo 'AWS_SECRET_KEY={your secret key}' | travis encrypt --add
-- [ ] create project on visualstudio online (gradle build with `upload` task and `-Pvs2015` option), building off develop branch
+- [ ] `echo 'AWS_SECRET_KEY={your secret key}' | travis encrypt --add`
+- [ ] create project on visualstudio online (gradle build with `upload` task and `-Pvs2015 -PnoDownload` options), building off develop branch
 - [ ] add env vars to visualstudio project on Variables tab
 - [ ] optionally, enable badge on General tab, and update readme
 
