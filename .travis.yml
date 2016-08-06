@@ -1,5 +1,4 @@
 language: java
-sudo: false
 addons:
   apt:
     packages: g++-multilib
@@ -15,7 +14,7 @@ matrix:
   include:
   - os: osx
     osx_image: xcode8
-    script: ./gradlew upload -PnoDownload && ls src/main/resources/lib/*/
+    script: ./gradlew upload -PnoDownload
   - os: linux
-    script: ./gradlew upload -PnoDownload && ls src/main/resources/lib/*/
+    script: ./gradlew upload -PnoDownload
     jdk: oraclejdk8
