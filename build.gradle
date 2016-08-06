@@ -108,22 +108,24 @@ model {
             }
         }
 
-        download(Task) {
-            doLast {
-                def url = "https://${aws_bucket}.s3-${aws_region}.amazonaws.com"
-                new XmlSlurper().parse(new URL("${url}?prefix=${hash}/").openStream()).Contents.Key.each { key ->
-                    def dest = project.file('src/main/resources/lib/' + "${key}".replace("${hash}/", ''))
-                    dest.parentFile.mkdirs()
-                    dest.withOutputStream{
-                        it << new URL("${url}/${key}").openStream()
+        if (!project.hasProperty('noDownload')) {
+            download(Task) {
+                doLast {
+                    def url = "https://${aws_bucket}.s3-${aws_region}.amazonaws.com"
+                    new XmlSlurper().parse(new URL("${url}?prefix=${hash}/").openStream()).Contents.Key.each { key ->
+                        def dest = project.file('src/main/resources/lib/' + "${key}".replace("${hash}/", ''))
+                        dest.parentFile.mkdirs()
+                        dest.withOutputStream{
+                            it << new URL("${url}/${key}").openStream()
+                        }
                     }
                 }
             }
+            processMainJarMainResources {
+                dependsOn $.tasks.download
+            }
         }
 
-        processMainJarMainResources {
-            dependsOn $.tasks.download
-        }
 
         wrapper {
             gradleVersion = '3.0-rc-1'
