@@ -100,29 +100,28 @@ model {
         }
 
         def hash = 'git rev-parse --short HEAD'.execute().text.trim()
-        def branch = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
-        if (branch == 'develop') {
-            s3LibSync(Task) {
-                dependsOn $.tasks.processMainJarMainResources
-                doLast {
-                    new TransferManager().uploadDirectory('bgorven-hello', hash, project.file('src/main/resources/lib'), true).waitForCompletion()
-                }
+        upload(Task) {
+            dependsOn $.tasks.processMainJarMainResources
+            doLast {
+                new TransferManager().uploadDirectory('bgorven-hello', hash, project.file('src/main/resources/lib'), true).waitForCompletion()
             }
+        }
 
-            build {
-                dependsOn $.tasks.s3LibSync
-            }
-        } else if (branch == 'master') {
-            s3LibSync(Task) {
-                doLast {
-                    new TransferManager().downloadDirectory('bgorven-hello', hash, project.buildDir).waitForCompletion()
-                    Files.move(project.buildDir.toPath().resolve(hash), project.file('src/main/resources/lib').toPath(), StandardCopyOption.REPLACE_EXISTING)
+        download(Task) {
+            doLast {
+                def url = 'https://s3-ap-southeast-2.amazonaws.com/bgorven-hello'
+                new XmlSlurper().parse(new URL("${url}?prefix=${hash}/").openStream()).Contents.Key.each { key ->
+                    def dest = project.file('src/main/resources/lib/' + "${key}".replace("${hash}/", ''))
+                    dest.parentFile.mkdirs()
+                    dest.withOutputStream{
+                        it << new URL("${url}/${key}").openStream()
+                    }
                 }
             }
-            
-            processMainJarMainResources {
-                dependsOn $.tasks.s3LibSync
-            }
+        }
+
+        processMainJarMainResources {
+            dependsOn $.tasks.download
         }
 
         wrapper {

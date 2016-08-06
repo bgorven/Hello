@@ -1,5 +1,8 @@
 language: java
-after_success: echo done
+sudo: false
+addons:
+  apt:
+    packages: g++-multilib
 env:
   global:
   - AWS_DEFAULT_REGION=ap-southeast-2
@@ -7,10 +10,21 @@ env:
   - secure: GZmff3fSkexEv/nlYPGAqqvarmWPvZYEGPR7l8yEMFewKb7ES9JqwpZ2RieA7XgHyGDEzDGD/BXedCTpqf4357/+HuXIBItdCioYWOWvqSJoYwEGk9KFb5dgC51QgSa6T33kvXg0ps2khdWr6sm90/4lZ3Tyrai9g5DgHFo6wovopLkD4ZQvp43IYYOnTwx5Q5LuXHV59es73amJhDyhZ+gCaKCD/k+TwqbITiINLMpif6bkP5rkAocOqqwMw866iq5D0SVQ1wjHbVk5g7ZnBYIY2LC6Zl6YGedIx65kbywRg4W7jMUw5TWTxAIm+oMEOQNvJ57+piiEG+NrtKN9uTGMl31AzXW0+if0Cp3YrgXXVCw+9R5mKH6dp/tyX5FjoDFNbrUFuIPeBPRP/yq+tgCUR5VQ4RRYGqLYjzvLW1IzX4bww6ELrblkbEAWexXWAZhVaKo+f64pu0X793qPNS9Lu9kCpWIm5bz5LdJCAJK6C7U7K3ulaRVHEF49WEZETsnf2U1Dj57gnBu+0q8jHdujHwkikBJyCeDdr9QxIPjVnwvHpnym/SgWVSoIPRu44OOomPnr46tV8W2vu448RQHzlmjPg4KzIH/0QYMcj4FfglgHMqcnfc1DZvSBJu/K5Dmumqm0EAOPM+gnVP3jvIjFkepnZsqrTyTCZfHy4Cw=
 matrix:
   include:
-  - os: osx
+  - branches:
+      only:
+      - develop
+    os: osx
     osx_image: xcode8
-  - os: linux
+    script: ./gradlew upload build
+  - branches:
+      only:
+      - develop
+    os: linux
+    script: ./gradlew upload build
     jdk: oraclejdk8
-    before_install:
-    - sudo apt-get -qq update
-    - sudo apt-get install -y g++-multilib
+  - branches:
+      except:
+      - develop
+    os: linux
+    script: ./gradlew build
+    jdk: oraclejdk8
